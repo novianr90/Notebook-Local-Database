@@ -11,6 +11,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import id.novian.binar.notebookapplication.adapter.NotesActionListener
 import id.novian.binar.notebookapplication.adapter.NotesAdapter
+import id.novian.binar.notebookapplication.database.db.DataProfileDatabase
 import id.novian.binar.notebookapplication.database.entities.Notes
 import id.novian.binar.notebookapplication.databinding.FragmentHomeBinding
 import id.novian.binar.notebookapplication.databinding.LayoutDialogDeleteBinding
@@ -28,11 +29,13 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var notesAdapter: NotesAdapter
-    private val dataProfileRepo : DataProfileRepo by lazy { DataProfileRepo(requireContext()) }
-    private val notesRepo : NotesRepo by lazy { NotesRepo(requireContext()) }
+    private val dataProfileRepo: DataProfileRepo by lazy { DataProfileRepo(requireContext()) }
+    private val notesRepo: NotesRepo by lazy { NotesRepo(requireContext()) }
     private val sessionMgr: SessionManager by lazy { SessionManager(requireContext()) }
 
-    private fun getEmail() : String? = sessionMgr.getLogin(SessionManager.EMAIL, null)
+    private var mDb: DataProfileDatabase? = null
+
+    private fun getEmail(): String? = sessionMgr.getLogin(SessionManager.EMAIL, null)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -127,7 +130,7 @@ class HomeFragment : Fragment() {
                 val title = editBinding.etTitle.text.toString()
                 val note = editBinding.etNotes.text.toString()
 
-                val newNotes = Notes(title, notes.userName, note)
+                val newNotes = Notes(notes.id, title, notes.userName, note)
                 updateNotesDb(newNotes)
 
                 dialog.dismiss()
@@ -137,12 +140,12 @@ class HomeFragment : Fragment() {
     }
 
     private fun getDataFromDb(){
-        val email = sessionMgr.getLogin(SessionManager.EMAIL, null)!!
+        val email = sessionMgr.getLogin(SessionManager.EMAIL, null)
         CoroutineScope(Dispatchers.IO).launch {
-            val username = dataProfileRepo.getUsernameFromEmail(email)!!
-            val result = notesRepo.getNotes(username)
+            val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
+            val result = username?.let { notesRepo.getNotes(it) }
 
-            if(result != null){
+            if (result != null) {
                 CoroutineScope(Dispatchers.Main).launch {
                     notesAdapter.submitNotes(result)
                 }

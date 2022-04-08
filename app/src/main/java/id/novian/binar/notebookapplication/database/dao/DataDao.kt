@@ -13,7 +13,7 @@ interface DataDao {
     fun getRegisteredDataProfile(email: String, password: String): List<DataProfile>
 
     @Query("SELECT username FROM DataProfile WHERE username = :username")
-    fun getUsername(username: String): String
+    fun getUsername(username: String?): String
 
     @Query("SELECT email FROM DataProfile WHERE email = :email")
     fun getEmail(email: String): String

@@ -9,7 +9,7 @@ import id.novian.binar.notebookapplication.database.dao.NotesDao
 import id.novian.binar.notebookapplication.database.entities.DataProfile
 import id.novian.binar.notebookapplication.database.entities.Notes
 
-@Database(entities = [DataProfile::class, Notes::class], version = 1)
+@Database(entities = [DataProfile::class, Notes::class], version = 2)
 abstract class DataProfileDatabase: RoomDatabase() {
     abstract fun dataProfileDao(): DataDao
     abstract fun notesDao(): NotesDao
@@ -20,9 +20,13 @@ abstract class DataProfileDatabase: RoomDatabase() {
         fun getInstance(context: Context): DataProfileDatabase? {
             if (INSTANCE == null){
                 synchronized(DataProfileDatabase::class) {
-                    INSTANCE = Room.databaseBuilder(context.applicationContext,
+                    INSTANCE = Room.databaseBuilder(
+                        context.applicationContext,
                         DataProfileDatabase::class.java,
-                    "DataProfile.db").build()
+                        "DataProfile.db"
+                    )
+                        .fallbackToDestructiveMigration()
+                        .build()
                 }
             }
             return INSTANCE

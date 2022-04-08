@@ -63,7 +63,7 @@ class CreateDialogFragment : DialogFragment() {
         val email = sessionMgr.getLogin(SessionManager.EMAIL, null)!!
         CoroutineScope(Dispatchers.IO).launch {
             val username = dataProfileRepo.getUsernameFromEmail(email)!!
-            val notes = Notes(title, username, note)
+            val notes = Notes(null, title, username, note)
             val result = notesRepo.insertNotes(notes)
             if (result != 0L){
                 toastInMainThread("Berhasil")
