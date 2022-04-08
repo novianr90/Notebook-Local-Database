@@ -11,12 +11,11 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import id.novian.binar.notebookapplication.adapter.NotesActionListener
 import id.novian.binar.notebookapplication.adapter.NotesAdapter
-import id.novian.binar.notebookapplication.database.db.DataProfileDatabase
 import id.novian.binar.notebookapplication.database.entities.Notes
 import id.novian.binar.notebookapplication.databinding.FragmentHomeBinding
+import id.novian.binar.notebookapplication.databinding.LayoutDialogAddBinding
 import id.novian.binar.notebookapplication.databinding.LayoutDialogDeleteBinding
 import id.novian.binar.notebookapplication.databinding.LayoutDialogEditBinding
-import id.novian.binar.notebookapplication.dialog.CreateDialogFragment
 import id.novian.binar.notebookapplication.helper.DataProfileRepo
 import id.novian.binar.notebookapplication.helper.NotesRepo
 import id.novian.binar.notebookapplication.helper.SessionManager
@@ -32,8 +31,6 @@ class HomeFragment : Fragment() {
     private val dataProfileRepo: DataProfileRepo by lazy { DataProfileRepo(requireContext()) }
     private val notesRepo: NotesRepo by lazy { NotesRepo(requireContext()) }
     private val sessionMgr: SessionManager by lazy { SessionManager(requireContext()) }
-
-    private var mDb: DataProfileDatabase? = null
 
     private fun getEmail(): String? = sessionMgr.getLogin(SessionManager.EMAIL, null)
 
@@ -54,7 +51,6 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        notesAdapter = NotesAdapter(action)
         initRecyclerView()
         setUsername()
         getDataFromDb()
@@ -80,16 +76,32 @@ class HomeFragment : Fragment() {
     }
 
     private fun initRecyclerView(){
-        binding.rvData.apply{
-            adapter = notesAdapter
+        binding.rvData.apply {
             layoutManager = LinearLayoutManager(requireContext())
+            notesAdapter = NotesAdapter(action)
+            adapter = notesAdapter
         }
     }
 
     private fun fabAddClicked(){
-        binding.fabAdd.setOnClickListener{
-            val createDialog = CreateDialogFragment()
-            createDialog.show(childFragmentManager, null)
+        binding.fabAdd.setOnClickListener {
+            val addDialog =
+                LayoutDialogAddBinding.inflate(LayoutInflater.from(requireContext()), null, false)
+
+            val builder = AlertDialog.Builder(requireContext())
+
+            builder.setView(addDialog.root)
+
+            val dialog = builder.create()
+
+            addDialog.btnInput.setOnClickListener {
+                val title = addDialog.etTitle.text.toString()
+                val note = addDialog.etNotes.text.toString()
+
+                saveNotesToDb(title, note)
+                dialog.dismiss()
+            }
+            dialog.show()
         }
     }
 
@@ -168,7 +180,7 @@ class HomeFragment : Fragment() {
     private fun updateNotesDb(notes: Notes) {
         CoroutineScope(Dispatchers.IO).launch {
             val result = notesRepo.updateNotes(notes)
-            if (result != 0){
+            if (result != 0) {
                 getDataFromDb()
                 toastInMainThread("Updated")
             } else {
@@ -177,7 +189,22 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun toastInMainThread(msg: String){
+    private fun saveNotesToDb(title: String, note: String) {
+        val email = sessionMgr.getLogin(SessionManager.EMAIL, null)
+        CoroutineScope(Dispatchers.IO).launch {
+            val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
+            val notes = username?.let { Notes(null, title, it, note) }
+            val result = notes?.let { notesRepo.insertNotes(it) }
+            if (result != 0L) {
+                getDataFromDb()
+                toastInMainThread("Berhasil")
+            } else {
+                toastInMainThread("Gagal")
+            }
+        }
+    }
+
+    private fun toastInMainThread(msg: String) {
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
         }
