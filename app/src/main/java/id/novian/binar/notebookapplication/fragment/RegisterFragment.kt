@@ -58,20 +58,32 @@ class RegisterFragment : Fragment() {
             val password = binding.etPassword.text.toString()
             val confirmPass = binding.etConfirmPassword.text.toString()
 
-            if(username.isEmpty()){
+            if (username.isEmpty()) {
+                binding.containerUsername.error = "Need Username"
                 valid = false
+            } else {
+                binding.containerUsername.error = null
             }
 
-            if(email.isEmpty()){
+            if (email.isEmpty()) {
+                binding.containerEmail.error = "Need Email"
                 valid = false
+            } else {
+                binding.containerEmail.error = null
             }
 
-            if(password.isEmpty()){
+            if (password.isEmpty()) {
+                binding.containerPassword.error = "Need Password"
                 valid = false
+            } else {
+                binding.containerPassword.error = null
             }
 
-            if(confirmPass.isEmpty()){
+            if (confirmPass.isEmpty()) {
+                binding.containerConfirmPassword.error = "Need Password"
                 valid = false
+            } else {
+                binding.containerConfirmPassword.error = null
             }
 
             if(valid){
@@ -83,7 +95,7 @@ class RegisterFragment : Fragment() {
                     }
                     else {
                         saveToDb(username, email, password)
-                        createToastInMainThread("Data Saved")
+                        createToastInMainThread("Data Created")
                         CoroutineScope(Dispatchers.Main).launch {
                             it.findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToLoginFragment())
                         }

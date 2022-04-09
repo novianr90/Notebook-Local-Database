@@ -18,6 +18,9 @@ interface DataDao {
     @Query("SELECT email FROM DataProfile WHERE email = :email")
     fun getEmail(email: String): String
 
+    @Query("SELECT password FROM DataProfile WHERE password = :password")
+    fun getPassword(password: String): String
+
     @Query("SELECT username FROM DataProfile WHERE email = :email")
     fun getUsernameFromEmail(email: String): String
 

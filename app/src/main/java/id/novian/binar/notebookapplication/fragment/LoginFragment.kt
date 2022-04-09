@@ -50,27 +50,47 @@ class LoginFragment : Fragment() {
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
 
-            if (email.isEmpty()){
+            if (email.isEmpty()) {
+                binding.containerEtName.error = "Input your email"
                 valid = false
+            } else {
+                binding.containerEtName.error = null
             }
 
-            if (password.isEmpty()){
+            if (password.isEmpty()) {
+                binding.containerEtPassword.error = "Input your password"
                 valid = false
+            } else {
+                binding.containerEtPassword.error = null
             }
 
             if (valid){
                 CoroutineScope(Dispatchers.IO).launch{
                     val result = dataProfileRepo.checkRegisteredProfile(email, password)
-                    if(!result.isNullOrEmpty()){
+                    val emailData = dataProfileRepo.getEmail(email)
+                    val passwordData = dataProfileRepo.getPassword(password)
+                    if (!result.isNullOrEmpty()) {
                         CoroutineScope(Dispatchers.Main).launch {
                             createToast("Welcome $email")
                             sessionMgr.setEmail(SessionManager.EMAIL, email)
                             sessionMgr.setLogin(true)
-                            it.findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment())
+                            it.findNavController()
+                                .navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment())
                         }
                     } else {
+                        if (emailData.isNullOrEmpty()) {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                createToast("You are not registered")
+                            }
+                        }
+                        if (passwordData.isNullOrEmpty()) {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                createToast("Wrong Password")
+                            }
+                        }
+
                         CoroutineScope(Dispatchers.Main).launch {
-                            createToast("Belum ada profile")
+                            createToast("Wrong Data")
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package id.novian.binar.notebookapplication.fragment
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -58,6 +59,7 @@ class HomeFragment : Fragment() {
         fabAddClicked()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setUsername() {
         val email = getEmail()!!
         CoroutineScope(Dispatchers.IO).launch {
@@ -152,7 +154,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun getDataFromDb(){
-        val email = sessionMgr.getLogin(SessionManager.EMAIL, null)
+        val email = getEmail()
         CoroutineScope(Dispatchers.IO).launch {
             val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
             val result = username?.let { notesRepo.getNotes(it) }
@@ -190,16 +192,16 @@ class HomeFragment : Fragment() {
     }
 
     private fun saveNotesToDb(title: String, note: String) {
-        val email = sessionMgr.getLogin(SessionManager.EMAIL, null)
+        val email = getEmail()
         CoroutineScope(Dispatchers.IO).launch {
             val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
             val notes = username?.let { Notes(null, title, it, note) }
             val result = notes?.let { notesRepo.insertNotes(it) }
             if (result != 0L) {
                 getDataFromDb()
-                toastInMainThread("Berhasil")
+                toastInMainThread("Notes Added")
             } else {
-                toastInMainThread("Gagal")
+                toastInMainThread("Failed")
             }
         }
     }

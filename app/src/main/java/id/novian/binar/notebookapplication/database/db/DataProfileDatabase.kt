@@ -25,7 +25,7 @@ abstract class DataProfileDatabase: RoomDatabase() {
                         DataProfileDatabase::class.java,
                         "DataProfile.db"
                     )
-                        .fallbackToDestructiveMigration()
+//                        .fallbackToDestructiveMigration()
                         .build()
                 }
             }

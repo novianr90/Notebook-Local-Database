@@ -37,6 +37,8 @@
         android:background="@drawable/bg_edit_text"
         android:hint="@string/txt_et_notes"
         android:padding="10dp"
+        android:lines="10"
+        android:maxLines="10"
         app:layout_constraintTop_toBottomOf="@id/et_title" />
 
     <Button

@@ -23,7 +23,7 @@ class DataProfileRepo(context: Context) {
     }
 
     suspend fun getUsernameFromEmail(email: String) = withContext(Dispatchers.IO){
-             mDb?.dataProfileDao()?.getUsernameFromEmail(email)
+        mDb?.dataProfileDao()?.getUsernameFromEmail(email)
     }
 
     suspend fun getUsername(username: String) = withContext(Dispatchers.IO) {
@@ -32,5 +32,9 @@ class DataProfileRepo(context: Context) {
 
     suspend fun getEmail(email: String) = withContext(Dispatchers.IO) {
         mDb?.dataProfileDao()?.getEmail(email)
+    }
+
+    suspend fun getPassword(password: String) = withContext(Dispatchers.IO) {
+        mDb?.dataProfileDao()?.getPassword(password)
     }
 }
