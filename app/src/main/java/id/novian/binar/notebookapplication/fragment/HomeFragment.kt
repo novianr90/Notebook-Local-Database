@@ -20,9 +20,8 @@ import id.novian.binar.notebookapplication.databinding.LayoutDialogEditBinding
 import id.novian.binar.notebookapplication.helper.DataProfileRepo
 import id.novian.binar.notebookapplication.helper.NotesRepo
 import id.novian.binar.notebookapplication.helper.SessionManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import id.novian.binar.notebookapplication.helper.viewModelFactory
+import id.novian.binar.notebookapplication.viewmodel.UpdateViewModel
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -33,7 +32,14 @@ class HomeFragment : Fragment() {
     private val notesRepo: NotesRepo by lazy { NotesRepo(requireContext()) }
     private val sessionMgr: SessionManager by lazy { SessionManager(requireContext()) }
 
-    private fun getEmail(): String? = sessionMgr.getLogin(SessionManager.EMAIL, null)
+    private fun getEmail(): String? = sessionMgr.getLogin(SessionManager.EMAIL, "email")
+
+    private val viewModel: UpdateViewModel by viewModelFactory {
+        UpdateViewModel(
+            notesRepo,
+            dataProfileRepo
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,6 +58,9 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewModel.getUsername(getEmail())
+
         initRecyclerView()
         setUsername()
         getDataFromDb()
@@ -61,23 +70,22 @@ class HomeFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun setUsername() {
-        val email = getEmail()!!
-        CoroutineScope(Dispatchers.IO).launch {
-            val username = dataProfileRepo.getUsernameFromEmail(email)
-            CoroutineScope(Dispatchers.Main).launch {
-                binding.tvWelcomeHome.text = "Welcome, $username"
-            }
+        viewModel.username.observe(requireActivity()) {
+            binding.tvWelcomeHome.text = "Welcome, $it"
         }
     }
 
     private fun tvLogoutClicked() {
         binding.tvLogout.setOnClickListener {
             sessionMgr.removeLogin()
-            it.findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoginFragment())
+            it.findNavController().navigate(
+                HomeFragmentDirections
+                    .actionHomeFragmentToLoginFragment()
+            )
         }
     }
 
-    private fun initRecyclerView(){
+    private fun initRecyclerView() {
         binding.rvData.apply {
             layoutManager = LinearLayoutManager(requireContext())
             notesAdapter = NotesAdapter(action)
@@ -85,7 +93,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun fabAddClicked(){
+    private fun fabAddClicked() {
         binding.fabAdd.setOnClickListener {
             val addDialog =
                 LayoutDialogAddBinding.inflate(LayoutInflater.from(requireContext()), null, false)
@@ -153,24 +161,44 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun getDataFromDb(){
-        val email = getEmail()
-        CoroutineScope(Dispatchers.IO).launch {
-            val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
-            val result = username?.let { notesRepo.getNotes(it) }
+    private fun getDataFromDb() {
+//        val email = getEmail()
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
+//            val result = username?.let { notesRepo.getNotes(it) }
+//
+//            if (result != null) {
+//                CoroutineScope(Dispatchers.Main).launch {
+//                    notesAdapter.submitNotes(result)
+//                }
+//            }
+//        }
+        viewModel.username.observe(requireActivity()) {
+            viewModel.getNotes(it)
+        }
 
-            if (result != null) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    notesAdapter.submitNotes(result)
-                }
+        viewModel.noteValue.observe(requireActivity()) {
+            if (it != null) {
+                notesAdapter.submitNotes(it)
             }
         }
     }
 
-    private fun deleteNotesDb(notes: Notes){
-        CoroutineScope(Dispatchers.IO).launch {
-            val result = notesRepo.deleteNotes(notes)
-            if (result != 0){
+    private fun deleteNotesDb(notes: Notes) {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val result = notesRepo.deleteNotes(notes)
+//            if (result != 0){
+//                getDataFromDb()
+//                toastInMainThread("Deleted")
+//            } else {
+//                toastInMainThread("Failed")
+//            }
+//        }
+
+        viewModel.deletesNotes(notes)
+
+        viewModel.deleteNotes.observe(requireActivity()) {
+            if (it != 0) {
                 getDataFromDb()
                 toastInMainThread("Deleted")
             } else {
@@ -180,9 +208,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateNotesDb(notes: Notes) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val result = notesRepo.updateNotes(notes)
-            if (result != 0) {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val result = notesRepo.updateNotes(notes)
+//            if (result != 0) {
+//                getDataFromDb()
+//                toastInMainThread("Updated")
+//            } else {
+//                toastInMainThread("Failed")
+//            }
+//        }
+        viewModel.updatesNotes(notes)
+
+        viewModel.updateNotes.observe(requireActivity()) {
+            if (it != 0) {
                 getDataFromDb()
                 toastInMainThread("Updated")
             } else {
@@ -192,23 +230,36 @@ class HomeFragment : Fragment() {
     }
 
     private fun saveNotesToDb(title: String, note: String) {
-        val email = getEmail()
-        CoroutineScope(Dispatchers.IO).launch {
-            val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
-            val notes = username?.let { Notes(null, title, it, note) }
-            val result = notes?.let { notesRepo.insertNotes(it) }
-            if (result != 0L) {
+//        val email = getEmail()
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val username = email?.let { dataProfileRepo.getUsernameFromEmail(it) }
+//            val notes = username?.let { Notes(null, title, it, note) }
+//            val result = notes?.let { notesRepo.insertNotes(it) }
+//            if (result != 0L) {
+//                getDataFromDb()
+//                toastInMainThread("Notes Added")
+//            } else {
+//                toastInMainThread("Failed")
+//            }
+//        }
+
+        viewModel.username.observe(requireActivity()) {
+            val objNotes = Notes(null, title, it, note)
+            viewModel.saveNotes(objNotes)
+        }
+
+        viewModel.insertData.observe(requireActivity()) {
+            if (it != 0L) {
                 getDataFromDb()
                 toastInMainThread("Notes Added")
             } else {
                 toastInMainThread("Failed")
             }
         }
+
     }
 
     private fun toastInMainThread(msg: String) {
-        CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-        }
     }
 }

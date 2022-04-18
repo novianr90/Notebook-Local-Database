@@ -11,6 +11,8 @@ import androidx.navigation.findNavController
 import id.novian.binar.notebookapplication.databinding.FragmentLoginBinding
 import id.novian.binar.notebookapplication.helper.DataProfileRepo
 import id.novian.binar.notebookapplication.helper.SessionManager
+import id.novian.binar.notebookapplication.helper.viewModelFactory
+import id.novian.binar.notebookapplication.viewmodel.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,7 +22,8 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val dataProfileRepo: DataProfileRepo by lazy { DataProfileRepo(requireContext()) }
-    private val sessionMgr: SessionManager by lazy { SessionManager(requireContext())}
+    private val sessionMgr: SessionManager by lazy { SessionManager(requireContext()) }
+    private val viewModel: LoginViewModel by viewModelFactory { LoginViewModel(dataProfileRepo) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,10 +48,11 @@ class LoginFragment : Fragment() {
 
     private fun btnLoginClicked(){
 
-        binding.btnLogin.setOnClickListener{
-            var valid = true
+        binding.btnLogin.setOnClickListener { view ->
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
+            getDataFromDb(email, password)
+            var valid = true
 
             if (email.isEmpty()) {
                 binding.containerEtName.error = "Input your email"
@@ -64,6 +68,7 @@ class LoginFragment : Fragment() {
                 binding.containerEtPassword.error = null
             }
 
+
             if (valid){
                 CoroutineScope(Dispatchers.IO).launch{
                     val result = dataProfileRepo.checkRegisteredProfile(email, password)
@@ -74,7 +79,7 @@ class LoginFragment : Fragment() {
                             createToast("Welcome $email")
                             sessionMgr.setEmail(SessionManager.EMAIL, email)
                             sessionMgr.setLogin(true)
-                            it.findNavController()
+                            view.findNavController()
                                 .navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment())
                         }
                     } else {
@@ -94,17 +99,31 @@ class LoginFragment : Fragment() {
                         }
                     }
                 }
+//                viewModel.emailAndPassword.observe(requireActivity()) { check ->
+//                    if (!check.isNullOrEmpty()){
+//                        createToast("Welcome $email")
+//                            sessionMgr.setEmail(SessionManager.EMAIL, email)
+//                            sessionMgr.setLogin(true)
+//                            view.findNavController()
+//                                .navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment())
+//                    }
+//                }
             }
         }
+    }
+
+    private fun getDataFromDb(email: String, password: String) {
+        viewModel.checkEmailAndPassword(email, password)
+        viewModel.checkEmail(email)
+        viewModel.checkPassword(password)
     }
 
     private fun checkEmailAndPasswordEmptyOrNull() {
         binding.etEmail.apply {
             doAfterTextChanged {
-                if (text.isNullOrEmpty()){
+                if (text.isNullOrEmpty()) {
                     binding.containerEtName.error = "Input your email"
-                }
-                else {
+                } else {
                     binding.containerEtName.error = null
                 }
             }

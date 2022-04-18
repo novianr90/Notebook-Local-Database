@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/drawable/bg_edit_text.xml" value="0.227" />
+        <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.155" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.1615" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/drawable/ic_baseline_edit_24.xml" value="0.1615" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/activity_main.xml" value="0.22447916666666667" />
@@ -12,11 +13,11 @@
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/fragment_edit_dialog.xml" value="0.18" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/fragment_home.xml" value="0.25" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/fragment_login.xml" value="0.18" />
-        <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/fragment_register.xml" value="0.33" />
+        <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/fragment_register.xml" value="0.25" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/fragment_splash.xml" value="0.22447916666666667" />
-        <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/item_data.xml" value="0.48853615520282184" />
+        <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/item_data.xml" value="0.5" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/item_data1.xml" value="0.5232383808095952" />
-        <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/layout_dialog_add.xml" value="0.22447916666666667" />
+        <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/layout_dialog_add.xml" value="0.5" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/layout_dialog_delete.xml" value="0.25" />
         <entry key="..\:/BelajarAndroid/NotebookApplication/app/src/main/res/layout/layout_dialog_edit.xml" value="0.22" />
       </map>
